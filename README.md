@@ -54,7 +54,37 @@ python -m valotrack
 2. Everyone runs `/link Name#TAG`. Admins can do `/link Name#TAG @friend`.
 3. Optional: `/settings mvp-schedule`, `/settings mvp-channel`, `/settings modes`, `/settings mvp-min-games`.
 
-The bot checks for new games every 3 minutes by default. It only needs to be running to post; if it goes offline, it catches up on games from the last 12 hours when it comes back. For 24/7 uptime, run it on an always-on machine or a small VPS.
+The bot checks for new games every 3 minutes by default. It has to be running to post; if it goes offline, it catches up on games from the last 12 hours when it comes back. To keep it online 24/7 without leaving your PC on, see [Free 24/7 hosting](#free-247-hosting-google-cloud).
+
+## Free 24/7 hosting (Google Cloud)
+
+Google Cloud's Always Free tier includes one small `e2-micro` server that never expires, which is plenty for this bot.
+
+1. **Sign up** at <https://cloud.google.com/free>. Google asks for a card to verify you, but the setup below stays inside the free limits.
+2. **Add a safety net:** go to **Billing → Budgets & alerts → Create budget**, set it to **$1**, and keep the email alerts on. If anything ever starts costing money, you'll hear about it right away.
+3. **Create the server:** go to **Compute Engine → VM instances → Create instance** (enable the API if asked).
+   - **Region:** `us-central1`, `us-west1`, or `us-east1`. Other regions aren't free.
+   - **Machine type:** E2 → `e2-micro`
+   - **Boot disk → Change:** Debian 12 or 13, disk type **Standard persistent disk** (the default "Balanced" is *not* free), 10–30 GB
+   - Leave the HTTP/HTTPS firewall boxes unchecked, since the bot doesn't need incoming traffic. If you see a backup or snapshot schedule option, turn it off.
+   - Click **Create**.
+4. Click **SSH** next to your new server to open a terminal in your browser, then run:
+   ```bash
+   curl -fsSL https://raw.githubusercontent.com/SauceageTF/ValoTrack/main/deploy/setup.sh | bash
+   ```
+5. Add your keys when it asks: `nano ~/ValoTrack/.env`, paste your `DISCORD_TOKEN`, `HENRIK_API_KEY` and `DEV_GUILD_ID`, then save with Ctrl+O, Enter, Ctrl+X.
+6. Run the same `curl … | bash` command again. The bot starts, and restarts itself after crashes or reboots.
+7. **Stop any copy running on your PC.** Two copies with the same token will double-post.
+
+Handy commands on the server:
+
+| Command | What it does |
+| --- | --- |
+| `journalctl -u valotrack -f` | Watch the logs live (Ctrl+C to stop watching) |
+| `sudo systemctl restart valotrack` | Restart the bot, e.g. after editing `.env` |
+| the `curl … \| bash` command | Update to the latest code from GitHub |
+
+To keep stats you already collected locally, upload your `valotrack.db` with the SSH window's **Upload file** button, then run `mv ~/valotrack.db ~/ValoTrack/ && sudo systemctl restart valotrack`.
 
 ## Commands
 
@@ -112,6 +142,8 @@ valotrack/
   db.py         SQLite storage
   embeds.py     All the Discord embeds
   cogs/         Slash commands + background loops
+deploy/
+  setup.sh      One-command install/update for a Debian/Ubuntu server
 tests/          pytest suite (fake API + temp DB)
 ```
 
