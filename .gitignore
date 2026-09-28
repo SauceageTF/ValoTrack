@@ -1,0 +1,25 @@
+# Secrets: keep real tokens/keys out of git; only the blank template is committed
+.env
+.env.*
+!.env.example
+
+# Python
+.venv/
+venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+
+# Bot data (linked accounts, match history)
+*.db
+*.db-journal
+*.db-wal
+*.db-shm
+
+# Logs and editor/OS clutter
+*.log
+.vscode/
+.idea/
+.claude/
+Thumbs.db
+.DS_Store
